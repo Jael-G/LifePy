@@ -14,16 +14,16 @@ Generate a simulation of size `m*n`. In this example, a 10x10 simulation will be
 
 ```python
 from lifepy import lifepy
-simulator = lifepy.Simulator(m_size=10, n_size=10, mode='ASCII')
+simulator = lifepy.Simulator(m_size=10, n_size=10, mode='ASCII', live_char='#', dead_char='-')
 simulator.generate_array()
 ```
 
-The `mode` argument determines how to show the simulation. Default mode uses `DEFAULT`, where live cells are shown as white blocks and dead cells are black blocks, for this mode, ANSI escape sequences are used. The other available mode is `ASCII`, where live cells are show as `#` and dead cells as `-`.
+The `mode` argument determines how to show the simulation. By default it is set to `DEFAULT`, where live cells are shown as white blocks and dead cells are black blocks, for this mode, ANSI escape sequences are used. The other available mode is `ASCII`. For `ASCII` the character used for live cells and dead cells can be specified with the `live_char` and `dead_char` accordingly. By default `#` is used for live cells and `-` is used for dead cells.
 
-You can see the current simulation by using the `show_simulation` method:
+You can see the current simulation by using the `get_simulation` method:
 
 ```python
-simulator.show_simulation()
+simulator.get_simulation(printout=True)
 ```
 Output:
 ```
@@ -38,8 +38,9 @@ Output:
 ---###-#-#
 -##-##-#--
 ```
+The `get_simulation` method returns the string used to represet the simulation(like the one shown in the output). The `printout` parameter prints the simulation when set to `True` and is used for other methods as well. By default, `printout` is set to `False` in all the methods.
 
-The simulation can procced in two ways.
+The simulation can advance in two ways.
 
 #### Step by step
 
@@ -63,25 +64,22 @@ Output:
 --#--#--#-
 ```
 
-The `printout` method prints the simulation after the step, when set to `True`. By default, it's value is `False`.
 
 #### Continuous simulation
 
-The `continuous_simulation` method does the `step` method until a `KeyboardInterrupt` exception occurs, or until all life in the simulation has ended.
+The `continuous_simulation` method does the `step` method until a `KeyboardInterrupt` exception occurs, or until all life in the simulation has ended. Since `continuous_simulation` uses the `curses` module it does not support ANSI escape sequences. Therefore, while on `continuous_simulation` the mode is `ASCII`, and after the simulation is interupted or it ends, the mode is set back to its original value.
 
 ```python
 from lifepy import lifepy
-simulator2 = lifepy.Simulator(m_size=10, n_size=10, mode='DEFAULT')
+simulator2 = lifepy.Simulator(m_size=30, n_size=50, mode='DEFAULT')
 simulator2.generate_array()
-print("Starting simulation...")
-simulator2.continous_simulation(step_deyal=1,printout=True)
+simulator2.continous_simulation(step_deyal=.1,printout=True)
 
 ```
 
 Output:
-```
-TO-DO: ADD GIF OF SIMULATION RUNNING
-```
+
+![alt text](https://github.com/Jael-G/lifepy/blob/main/output_example.gif)
 
 The `step_delay` determines the time (in seconds) between each step.
 
@@ -108,7 +106,7 @@ pre_array = numpy.array([[1,1,1,1,1,1,1,1,1,1],
                         [0,0,0,0,0,0,0,0,0,0]])
 
 simulator3.load_array(pre_array)
-simulator3.show_simulation()
+simulator3.get_simulation(printout=True)
 ```
 
 Output:
@@ -139,12 +137,5 @@ Example:
     
     However, the `get_array` method will NOT return the simulated array, it will return a properly 'cropped' array.
 
-- When using the method `continuous_simulation` with `printout` set to `True`, the module `sys` is used to move the cursor up and delete the line in the terminal m times (m being the amount of columns) by using ```sys.stdout.write("\x1b[1A\x1b[2K")```. This is done because:
 
-    1) It allows to clear the screen without using `os.system('clear')`, which makes the terminal 'blink', making the simulation appear less smooth, as well as having possible security issues.
-    2) Works better than using other escape sequences that create empty lines, shifting everything up and therefore making a 'mess'.
-    3) Most importantly, it does not deleted nor shifts too far up any previous printed content.
-    
-    A more efficent way to clear the screen is being looked into, possibly by using the `curses` module.
-
-- Related to the previous point, it is recommended to use m and n values that fit within the screen when printing the simulation. Otherwise, it most likely will appear in an odd way. 
+- It is recommended to use m and n values that fit within the screen when printing the simulation. Otherwise, it most likely will appear in an odd way. 

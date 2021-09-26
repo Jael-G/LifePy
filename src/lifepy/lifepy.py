@@ -1,3 +1,4 @@
+import curses
 import numpy
 import random
 import sys
@@ -5,11 +6,13 @@ import time
 
 
 class Simulator:
-    def __init__(self, m_size=50, n_size=50, mode='DEFAULT'):
+    def __init__(self, m_size=50, n_size=50, mode='DEFAULT', live_char='#', dead_char='-'):
         self.__m_size = m_size
         self.__n_size = n_size
         self.mode = mode
         self.__array = None
+        self.live_char = live_char
+        self.dead_char = dead_char
 
     def get_array(self):
         copied_array = self.__array.copy()
@@ -85,7 +88,7 @@ class Simulator:
         
         return 0
 
-    def show_simulation(self):
+    def get_simulation(self,printout=False):
 
         if self.__array_not_generated():
             raise Exception("Array is NoneType. Array most be generated or loaded.")
@@ -100,17 +103,20 @@ class Simulator:
                         array_string += "\u001b[47m" + " " + "\033[0;0m"
                     else:
                         array_string += "\u001b[00;1m" + " " + "\033[0;0m"
+                    
+                    array_string += "\033[0;0m"
 
                 elif self.mode == 'ASCII':
                     if self.__array[i][j]:
-                        array_string += "#"
+                        array_string += f"{self.live_char}"
                     else:
-                        array_string += "-"
+                        array_string += f"{self.dead_char}"
 
             array_string += "\n"
-            array_string += "\033[0;0m"
 
-        print(array_string)
+        if printout:
+            print(array_string)
+        return array_string
 
     def step(self, printout=False):
         if self.__array_not_generated():
@@ -118,41 +124,65 @@ class Simulator:
 
 
         if not numpy.count_nonzero(self.__array) == 0:
+            try:
+                copied_array = self.__array.copy()
+                final_array = numpy.zeros((self.__m_size + 2, self.__n_size + 2))
 
-            copied_array = self.__array.copy()
-            final_array = numpy.zeros((self.__m_size + 2, self.__n_size + 2))
+                for i in range(1, self.__m_size + 1):
+                    for j in range(1, self.__n_size + 1):
 
-            for i in range(1, self.__m_size + 1):
-                for j in range(1, self.__n_size + 1):
+                        current_cell = copied_array[i][j]
+                        surrounding_cells = [
+                            copied_array[i - 1][j - 1], copied_array[i - 1][j], copied_array[i - 1][j + 1],
+                            copied_array[i][j - 1], copied_array[i][j + 1],
+                            copied_array[i + 1][j - 1], copied_array[i + 1][j], copied_array[i + 1][j + 1]
+                        ]
 
-                    current_cell = copied_array[i][j]
-                    surrounding_cells = [
-                        copied_array[i - 1][j - 1], copied_array[i - 1][j], copied_array[i - 1][j + 1],
-                        copied_array[i][j - 1], copied_array[i][j + 1],
-                        copied_array[i + 1][j - 1], copied_array[i + 1][j], copied_array[i + 1][j + 1]
-                    ]
+                        alive_surrounding_cells = surrounding_cells.count(True)
+                        if (not current_cell and alive_surrounding_cells == 3) or (
+                                current_cell and alive_surrounding_cells == 2 or alive_surrounding_cells == 3):
+                            final_array[i][j] = True
+                        if current_cell and alive_surrounding_cells != 2 and alive_surrounding_cells != 3:
+                            final_array[i][j] = False
 
-                    alive_surrounding_cells = surrounding_cells.count(True)
-                    if (not current_cell and alive_surrounding_cells == 3) or (
-                            current_cell and alive_surrounding_cells == 2 or alive_surrounding_cells == 3):
-                        final_array[i][j] = True
-                    if current_cell and alive_surrounding_cells != 2 and alive_surrounding_cells != 3:
-                        final_array[i][j] = False
+                        self.__array = final_array.copy()
 
-                    self.__array = final_array.copy()
+                if printout:
+                    self.get_simulation(printout)
+            except KeyboardInterrupt:
+                self.__array=copied_array.copy()
+                raise KeyboardInterrupt
 
-            if printout:
-                self.show_simulation()
         else:
             print("Cannot do any more steps. All life has ended in the simulation")
 
     def continuous_simulation(self, step_delay=0, printout=False):
+        '''
+        Show the simulation in a curses window
+
+        Only 'ASCII' mode works.
+        '''
+
+        saved_mode = self.mode
+        self.mode = 'ASCII'            
         if self.__array_not_generated():
             raise Exception("Array is NoneType. Array most be generated or loaded.")
-
+        
+        if printout:
+            simulation_screen = curses.initscr()
+            simulation_screen.clear()
+            
         try:
             while True:
-                self.step(printout)
+                self.step(False)
+
+                if printout:
+                    simulation_screen.clear()
+                    try:
+                        simulation_screen.addstr(0,0, self.get_simulation(printout=False))
+                    except:
+                        pass
+                    simulation_screen.refresh()
 
                 if numpy.count_nonzero(self.__array) == 0:
                     print("All life has ended in the simulation")
@@ -160,9 +190,13 @@ class Simulator:
 
                 time.sleep(step_delay)
 
-                if printout:
-                    for _ in range(self.__m_size + 1):
-                        sys.stdout.write("\x1b[1A\x1b[2K")
-
         except KeyboardInterrupt:
+            if printout:
+                simulation_screen.clear()
+                curses.nocbreak()
+                curses.echo()
+                curses.endwin()
+                simulation_screen.clear()
             print("Exiting simulation")
+        
+        self.mode = saved_mode
