@@ -13,7 +13,7 @@ Install via pip:
 Generate a simulation of size `m*n`. In this example, a 10x10 simulation will be generated, using a random array for the initial position of live and dead cells.
 
 ```python
-import lifepy
+from lifepy import lifepy
 simulator = lifepy.Simulator(m_size=10, n_size=10, mode='ASCII')
 simulator.generate_array()
 ```
@@ -70,7 +70,7 @@ The `printout` method prints the simulation after the step, when set to `True`. 
 The `continuous_simulation` method does the `step` method until a `KeyboardInterrupt` exception occurs, or until all life in the simulation has ended.
 
 ```python
-import lifepy
+from lifepy import lifepy
 simulator2 = lifepy.Simulator(m_size=10, n_size=10, mode='DEFAULT')
 simulator2.generate_array()
 print("Starting simulation...")
@@ -92,7 +92,7 @@ It is important to take into account that the `m*n` size specified at the start 
 Instead of generating a random array for the simulation, a predetermined one can be loaded. However the size of the array must equal the size of the simulation.
 
 ```python
-import lifepy
+from lifepy import lifepy
 import numpy
 
 simulator3 = lifepy.Simulator(m_size=10, n_size=10, mode='ASCII')
