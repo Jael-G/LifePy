@@ -19,10 +19,10 @@ class Simulator:
         copied_array = numpy.delete(copied_array, self.__n_size, 1)
         return copied_array.copy()
 
-    def get_x_size(self):
+    def get_m_size(self):
         return self.__m_size
 
-    def get_y_size(self):
+    def get_n_size(self):
         return self.__n_size
 
     def generate_array(self):
