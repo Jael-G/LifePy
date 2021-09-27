@@ -73,13 +73,13 @@ The `continuous_simulation` method does the `step` method until a `KeyboardInter
 from lifepy import lifepy
 simulator2 = lifepy.Simulator(m_size=30, n_size=50, mode='DEFAULT')
 simulator2.generate_array()
-simulator2.continous_simulation(step_deyal=.1,printout=True)
+simulator2.continuous_simulation(step_deyal=.1,printout=True)
 
 ```
 
 Output:
 
-![alt text](https://github.com/Jael-G/lifepy/blob/main/output_example.gif)
+![GIF example of continuous simulation](https://github.com/Jael-G/lifepy/blob/main/output_example.gif)
 
 The `step_delay` determines the time (in seconds) between each step.
 

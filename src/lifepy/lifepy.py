@@ -151,7 +151,7 @@ class Simulator:
                         if (not current_cell and alive_surrounding_cells == 3) or (
                                 current_cell and alive_surrounding_cells == 2 or alive_surrounding_cells == 3):
                             final_array[i][j] = True
-                        if current_cell and alive_surrounding_cells != 2 and alive_surrounding_cells != 3:
+                        elif current_cell and alive_surrounding_cells != 2 and alive_surrounding_cells != 3:
                             final_array[i][j] = False
 
                         self.__array = final_array.copy()
@@ -186,21 +186,27 @@ class Simulator:
             
         try:
             while True:
-                self.step(False)
+                if self.step(False):
 
-                if printout:
-                    simulation_screen.clear()
-                    try:
-                        simulation_screen.addstr(0,0, self.get_simulation(printout=False))
-                    except:
-                        pass
-                    simulation_screen.refresh()
+                    if printout:
+                        simulation_screen.clear()
+                        try:
+                            simulation_screen.addstr(0,0, self.get_simulation(printout=False))
+                        except:
+                            pass
+                        simulation_screen.refresh()
 
-                if numpy.count_nonzero(self.__array) == 0:
-                    print("All life has ended in the simulation")
+
+                    time.sleep(step_delay)
+                else:
+                    if printout:
+                        simulation_screen.clear()
+                        curses.nocbreak()
+                        curses.echo()
+                        curses.endwin()
+                        simulation_screen.clear()
+                    print("Cannot do any more steps. All life has ended in the simulation")
                     break
-
-                time.sleep(step_delay)
 
         except KeyboardInterrupt:
             if printout:
