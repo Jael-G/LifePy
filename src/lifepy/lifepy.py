@@ -90,6 +90,11 @@ class Simulator:
 
     def get_simulation(self,printout=False):
 
+        '''
+        Returns the string used to represet the array when doing the simulation
+
+        '''
+
         if self.__array_not_generated():
             raise Exception("Array is NoneType. Array most be generated or loaded.")
 
@@ -119,6 +124,10 @@ class Simulator:
         return array_string
 
     def step(self, printout=False):
+        '''
+        Advances the simulation 1 step foward. If succesful returns 1. If it's unable to do a step 
+        (the simulation has ended), returns 0.
+        '''
         if self.__array_not_generated():
             raise Exception("Array is NoneType. Array most be generated or loaded.")
 
@@ -149,12 +158,15 @@ class Simulator:
 
                 if printout:
                     self.get_simulation(printout)
+                return 1
+
             except KeyboardInterrupt:
                 self.__array=copied_array.copy()
                 raise KeyboardInterrupt
 
         else:
             print("Cannot do any more steps. All life has ended in the simulation")
+            return 0
 
     def continuous_simulation(self, step_delay=0, printout=False):
         '''
