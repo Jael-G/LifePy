@@ -130,7 +130,7 @@ The `get_array` method returns a copy of the array being used for the simulation
 
 
 #### Notes
-- When an array are being used for the simulation, it will have a 'border' of zeros. This was done for preventing out of index errors when checking for live cells.
+- When an array is being used for the simulation, it will have a 'border' of zeros. This was done for preventing out of index errors when checking for live cells.
 Example:
 
     - ```Original array: [[1,1],[1,1]] -> Array simulated: [[0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0]]```
